@@ -1,5 +1,6 @@
 from src.plugin_interface import PluginInterface
 from PyQt6.QtWidgets import QWidget
+from PyQt6 import QtGui
 from .ui_main import Ui_Form
 from skimage.segmentation import watershed
 from scipy import ndimage
@@ -7,6 +8,7 @@ import os
 import cv2
 import numpy as np
 import imutils
+import matplotlib.pyplot as plt
 
 class Controller(QWidget):
     def __init__(self, model):
@@ -15,129 +17,142 @@ class Controller(QWidget):
         self.ui.setupUi(self)
         self.model = model
         self.image = None
+        self.render_image = False   # variabel agar tidak bisa load img ketika sudah ada img
         self.set_stylesheet()
 
     def set_stylesheet(self):
         # This is set up style label on bonding box ui
         self.ui.label_ori_1.setStyleSheet(self.model.style_label())
+        # self.ui.label_ori_1.setFixedHeight(484)
         self.ui.label_1_1.setStyleSheet(self.model.style_label())
         self.ui.label_1_2.setStyleSheet(self.model.style_label())
         self.ui.label_1_3.setStyleSheet(self.model.style_label())
         self.ui.label_1_4.setStyleSheet(self.model.style_label())
-        self.ui.label_ori_2.setStyleSheet(self.model.style_label())
+        # self.ui.label_ori_2.setStyleSheet(self.model.style_label())
         self.ui.label_3.setStyleSheet(self.model.style_label())
+        # self.ui.label_3.setFixedWidth(85)
 
-        self.ui.label_2_1.setStyleSheet(self.model.style_label())
-        self.ui.label_2_2.setStyleSheet(self.model.style_label())
-        self.ui.label_2_3.setStyleSheet(self.model.style_label())
-        self.ui.label_2_4.setStyleSheet(self.model.style_label())
-        self.ui.label_13.setStyleSheet(self.model.style_label())
-        self.ui.label_14.setStyleSheet(self.model.style_label())
+        # self.ui.label_2_1.setStyleSheet(self.model.style_label())
+        # self.ui.label_2_2.setStyleSheet(self.model.style_label())
+        # self.ui.label_2_3.setStyleSheet(self.model.style_label())
+        # self.ui.label_2_4.setStyleSheet(self.model.style_label())
+        # self.ui.label_13.setStyleSheet(self.model.style_label())
+        # self.ui.label_14.setStyleSheet(self.model.style_label())
 
         self.ui.label.setStyleSheet(self.model.style_label())
+        self.ui.label.setFixedHeight(30)    # mengatur paksa tinggi label
         self.ui.label_2.setStyleSheet(self.model.style_label())
         self.ui.label_4.setStyleSheet(self.model.style_label())
         self.ui.label_5.setStyleSheet(self.model.style_label())
-        self.ui.label_6.setStyleSheet(self.model.style_label())
-        self.ui.label_7.setStyleSheet(self.model.style_label())
-        self.ui.label_9.setStyleSheet(self.model.style_label())
-        self.ui.label_10.setStyleSheet(self.model.style_label())
-        self.ui.label_11.setStyleSheet(self.model.style_label())
+        # self.ui.label_6.setStyleSheet(self.model.style_label())
+        # self.ui.label_7.setStyleSheet(self.model.style_label())
+        # self.ui.label_9.setStyleSheet(self.model.style_label())
+        # self.ui.label_10.setStyleSheet(self.model.style_label())
+        # self.ui.label_11.setStyleSheet(self.model.style_label())
         self.ui.label_12.setStyleSheet(self.model.style_label())
-        self.ui.label_15.setStyleSheet(self.model.style_label())
+        # self.ui.label_15.setStyleSheet(self.model.style_label())
 
         self.ui.line.setStyleSheet(self.model.style_line())
         self.ui.line_2.setStyleSheet(self.model.style_line())
-        self.ui.line_3.setStyleSheet(self.model.style_line())
+        # self.ui.line_3.setStyleSheet(self.model.style_line())
         self.ui.line_4.setStyleSheet(self.model.style_line())
-        self.ui.line_5.setStyleSheet(self.model.style_line())
+        # self.ui.line_5.setStyleSheet(self.model.style_line())
 
         # This is set up style button on bonding box ui
         self.ui.load_img1.setStyleSheet(self.model.style_pushbutton())
-        self.ui.multi_1.setStyleSheet(self.model.style_pushbutton())
+        # self.ui.multi_1.setStyleSheet(self.model.style_pushbutton())
         self.ui.params_1.setStyleSheet(self.model.style_pushbutton())
         self.ui.clear_1.setStyleSheet(self.model.style_pushbutton())
 
-        self.ui.load_img2.setStyleSheet(self.model.style_pushbutton())
-        self.ui.multi_2.setStyleSheet(self.model.style_pushbutton())
-        self.ui.params_2.setStyleSheet(self.model.style_pushbutton())
-        self.ui.clear_2.setStyleSheet(self.model.style_pushbutton())
+        # self.ui.load_img2.setStyleSheet(self.model.style_pushbutton())
+        # self.ui.multi_2.setStyleSheet(self.model.style_pushbutton())
+        # self.ui.params_2.setStyleSheet(self.model.style_pushbutton())
+        # self.ui.clear_2.setStyleSheet(self.model.style_pushbutton())
 
         # This is set up to connect to other function to make action on ui
         self.ui.load_img1.clicked.connect(self.load_image_1)
-        self.ui.multi_1.clicked.connect(self.cam_params)
-        self.ui.params_1.clicked.connect(self.cam_params)
+        self.ui.params_1.clicked.connect(self.load_image_crop)
         self.ui.clear_1.clicked.connect(self.clearImg)
 
         # This is set up to connect to other function to make action on ui
-        self.ui.load_img2.clicked.connect(self.load_image_2)
-        self.ui.multi_2.clicked.connect(self.cam_params)
-        self.ui.params_2.clicked.connect(self.cam_params)
-        self.ui.clear_2.clicked.connect(self.cam_params)
+        # self.ui.load_img2.clicked.connect(self.load_image_2)
+        # self.ui.multi_2.clicked.connect(self.cam_params)
+        # self.ui.params_2.clicked.connect(self.cam_params)
+        # self.ui.clear_2.clicked.connect(self.cam_params)
 
     def clearImg(self):
-        self.ui.label_1_4
+        self.image = None
+        self.render_image = False
+        self.ui.label_14.setText("")
+        # fungsi untuk membersihkan gambar yg sudah di load
+        self.ui.label_ori_1.clear()
+        self.ui.label_1_1.clear()
+        self.ui.label_1_2.clear()
+        self.ui.label_1_3.clear()
+        self.ui.label_1_4.clear()
 
     def load_image_1(self):
+        if self.render_image: return    # kalo true bakal kembali
         file = self.model.select_file()
         if file:
             if file:
                 self.moildev = self.model.connect_to_moildev(parameter_name=file)
-            self.image_original = cv2.imread(file)
-            self.image = self.image_original.copy()
-            # self.app(file)
-            self.show_to_ui_img_1(file)
+            if file.partition('.')[-1].upper() in ['APNG', 'AVIF', 'GIF', 'JPEG', 'JPG', 'PNG', 'SVG', 'TIFF', 'WEBP']:
+                self.image_original = cv2.imread(file)
+                self.image = self.image_original.copy()
+                self.render_image = True
+                self.show_to_ui_img_1(file)
 
-    def load_image_2(self):
+    def load_image_crop(self):
         file = self.model.select_file()
         if file:
             if file:
                 self.moildev = self.model.connect_to_moildev(parameter_name=file)
             self.image_original = cv2.imread(file)
             self.image = self.image_original.copy()
-            self.show_to_ui_img_2(file)
+            self.show_to_ui_img_crop(file)
 
     def show_to_ui_img_1(self, img_path):
-        self.model.show_image_to_label(self.ui.label_ori_1, self.image, 500)
         img = cv2.imread(img_path)
-
-        gray = self.convert_grayscale(img)
-        self.model.show_image_to_label(self.ui.label_1_1, gray, 300)
-
-        thresh = self.thresholding(gray)
-        self.model.show_image_to_label(self.ui.label_1_2, thresh, 300)
-
-        morpho = self.morphological_opr(thresh)
-        self.model.show_image_to_label(self.ui.label_1_3, morpho, 300)
-
         dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat/saved_img/HFD"
 
+        gray = self.convert_grayscale(img)
+        thresh = self.thresholding(gray)
+        morpho = self.morphological_opr(thresh)
         cells, cell_count = self.count_cells(img_path, dir_img_save_path)
-        self.model.show_image_to_label(self.ui.label_1_4, cells, 300)
+
+        self.model.show_image_to_label(self.ui.label_ori_1, self.image_original, 620)
+        self.model.show_image_to_label(self.ui.label_1_1, thresh, 300)
+        self.model.show_image_to_label(self.ui.label_1_2, cells, 300)
+        self.model.show_image_to_label(self.ui.label_1_3, morpho, 300)
+        # self.model.show_image_to_label(self.ui.label_1_4, , 300)
+
         self.ui.label_14.setText(f"{cell_count}")
 
-        self.crop_img(dir_img_save_path)
+        # self.crop_img(dir_img_save_path)
+        self.graph()
 
-    def show_to_ui_img_2(self, img_path):
-        self.model.show_image_to_label(self.ui.label_ori_2, self.image, 500)
-        img = cv2.imread(img_path)
+    def show_to_ui_img_crop(self, img_path):
+        # img = cv2.imread(img_path)
 
-        gray = self.convert_grayscale(img)
-        self.model.show_image_to_label(self.ui.label_2_1, gray, 300)
+        dir_img_save_path = "/plugins/moilapp-plugin-histologi-bat-git/saved-img/crop"
 
-        thresh = self.thresholding(gray)
-        self.model.show_image_to_label(self.ui.label_2_2, thresh, 300)
+        # gray = self.convert_grayscale(img_path)
+        # thresh = self.thresholding(gray)
+        # morpho = self.morphological_opr(thresh)
+        # cells, cell_count = self.count_cells(img_path, dir_img_save_path)
 
-        morpho = self.morphological_opr(thresh)
-        self.model.show_image_to_label(self.ui.label_2_3, morpho, 300)
+        self.model.show_image_to_label(self.ui.label_ori_1, self.image_original, 620)
+        self.crop_img(dir_img_save_path, img_path)
 
-        dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat/saved_img/ND"
+        # self.model.show_image_to_label(self.ui.label_ori_2, self.image_original, 620)
+        # self.model.show_image_to_label(self.ui.label_2_1, gray, 300)
+        # self.model.show_image_to_label(self.ui.label_2_2, thresh, 300)
+        # self.model.show_image_to_label(self.ui.label_2_3, morpho, 300)
+        # self.model.show_image_to_label(self.ui.label_2_4, cells, 300)
+        #
+        # self.ui.label_15.setText(f"{cell_count}")
 
-        cells, cell_count = self.count_cells(img_path, dir_img_save_path)
-        self.model.show_image_to_label(self.ui.label_2_4, cells, 300)
-        self.ui.label_15.setText(f"{cell_count}")
-
-        self.crop_img(dir_img_save_path)
 
     def cam_params(self):
         self.model.form_camera_parameter()
@@ -161,17 +176,17 @@ class Controller(QWidget):
         # perhitungan jarak transformasi
         D = ndimage.distance_transform_edt(img_mop)
 
-        # mencari nalai lokal max di jarak tranformasi gambar menggunakan numpy
-        local_max_coords = np.argwhere((D == ndimage.maximum_filter(D, size=20)) & (D > 0))
-
-        # konversi kodinat lokal max ke bool
-        localMax = np.zeros(D.shape, dtype=bool)
-        localMax[tuple(local_max_coords.T)] = True
-
-        markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
-
-        # untuk labeling gambar https://pyimagesearch.com/2015/11/02/watershed-opencv/
-        labels = watershed(-D, markers, mask=img_mop)
+        # # mencari nalai lokal max di jarak tranformasi gambar menggunakan numpy
+        # local_max_coords = np.argwhere((D == ndimage.maximum_filter(D, size=20)) & (D > 0))
+        #
+        # # konversi kodinat lokal max ke bool
+        # localMax = np.zeros(D.shape, dtype=bool)
+        # localMax[tuple(local_max_coords.T)] = True
+        #
+        # markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
+        #
+        # # untuk labeling gambar https://pyimagesearch.com/2015/11/02/watershed-opencv/
+        # labels = watershed(-D, markers, mask=img_mop)
 
         return D
 
@@ -191,7 +206,7 @@ class Controller(QWidget):
         markers = cv2.watershed(image, markers)
 
         cell_count = len(np.unique(markers)) - 1
-        # self.ui.label_14.setText(f"{cell_count}")
+        self.ui.label_14.setText(f"\t{cell_count}")
 
         for label in np.unique(markers):
             if label == -1:
@@ -218,17 +233,27 @@ class Controller(QWidget):
 
         return image, cell_count
 
-    def crop_img(self, dir_path):
+    def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 8
 
         # gambar yg sudah di labeling
-        img = cv2.imread(f"{dir_path}/count_cell.png")
+        img = cv2.imread(img_path)
         height, width = img.shape[:2]
 
         # menghitung ukuran gambar untuk dipotong
         row_start, row_end = self.count_crop_img(jmh_crop, height)
         col_start, col_end = self.count_crop_img(jmh_crop, width)
+
+        # img_save_path = f"{dir_path}/count_cell.png"
+
+        if (os.path.exists(f"{dir_path}")):
+            if (os.path.isdir(f"{dir_path}")):
+                os.system(f"rm -R {dir_path}")
+                os.mkdir(f"{dir_path}")
+                # cv2.imwrite(img_save_path, image)
+        else:
+            os.mkdir(f"{dir_path}")
 
         for i in range(0, jmh_crop):
             for j in range(0, jmh_crop):
@@ -254,6 +279,30 @@ class Controller(QWidget):
         end_crop.pop(0)
         return start_crop, end_crop
 
+    def graph(self):
+        # Fixing random state for reproducibility
+        np.random.seed(19680801)
+
+        dt = 0.01
+        t = np.arange(0, 30, dt)
+        nse1 = np.random.randn(len(t))  # white noise 1
+        nse2 = np.random.randn(len(t))  # white noise 2
+
+        # Two signals with a coherent part at 10 Hz and a random part
+        s1 = np.sin(2 * np.pi * 10 * t) + nse1
+        s2 = np.sin(2 * np.pi * 10 * t) + nse2
+
+        fig, axs = plt.subplots(2, 1, layout='constrained')
+        axs[0].plot(t, s1, t, s2)
+        axs[0].set_xlim(0, 2)
+        axs[0].set_xlabel('Time (s)')
+        axs[0].set_ylabel('s1 and s2')
+        axs[0].grid(True)
+
+        cxy, f = axs[1].cohere(s1, s2, 256, 1. / dt)
+        axs[1].set_ylabel('Coherence')
+
+        plt.show()
 
 class HistologiBat(PluginInterface):
     def __init__(self):
@@ -270,4 +319,3 @@ class HistologiBat(PluginInterface):
 
     def change_stylesheet(self):
         self.widget.set_stylesheet()
-
