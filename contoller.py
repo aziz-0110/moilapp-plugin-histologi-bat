@@ -279,7 +279,7 @@ class Controller(QWidget):
         end_crop.pop(0)
         return start_crop, end_crop
 
-    def graph(self):
+    def graph(self):    # untuk grafik
         species = ("Adelie", "Chinstrap", "Gentoo")
         penguin_means = {
             '0,02': (18.35, 18.43, 14.98),
