@@ -135,7 +135,7 @@ class Controller(QWidget):
     def show_to_ui_img_crop(self, img_path):
         # img = cv2.imread(img_path)
 
-        dir_img_save_path = "/plugins/moilapp-plugin-histologi-bat-git/saved-img/crop"
+        dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat-git/saved_img/crop"
 
         # gray = self.convert_grayscale(img_path)
         # thresh = self.thresholding(gray)
@@ -280,29 +280,34 @@ class Controller(QWidget):
         return start_crop, end_crop
 
     def graph(self):
-        # Fixing random state for reproducibility
-        np.random.seed(19680801)
+        species = ("Adelie", "Chinstrap", "Gentoo")
+        penguin_means = {
+            '0,02': (18.35, 18.43, 14.98),
+            '0,01': (38.79, 48.83, 47.50),
+            '0,03': (189.95, 195.82, 217.19),
+        }
 
-        dt = 0.01
-        t = np.arange(0, 30, dt)
-        nse1 = np.random.randn(len(t))  # white noise 1
-        nse2 = np.random.randn(len(t))  # white noise 2
+        x = np.arange(len(species))  # the label locations
+        width = 0.25  # the width of the bars
+        multiplier = 0
 
-        # Two signals with a coherent part at 10 Hz and a random part
-        s1 = np.sin(2 * np.pi * 10 * t) + nse1
-        s2 = np.sin(2 * np.pi * 10 * t) + nse2
+        fig, ax = plt.subplots(layout='constrained')
 
-        fig, axs = plt.subplots(2, 1, layout='constrained')
-        axs[0].plot(t, s1, t, s2)
-        axs[0].set_xlim(0, 2)
-        axs[0].set_xlabel('Time (s)')
-        axs[0].set_ylabel('s1 and s2')
-        axs[0].grid(True)
+        for attribute, measurement in penguin_means.items():
+            offset = width * multiplier
+            rects = ax.bar(x + offset, measurement, width, label=attribute)
+            ax.bar_label(rects, padding=3)
+            multiplier += 1
 
-        cxy, f = axs[1].cohere(s1, s2, 256, 1. / dt)
-        axs[1].set_ylabel('Coherence')
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        ax.set_ylabel('Length (mm)')
+        ax.set_title('Penguin attributes by species')
+        ax.set_xticks(x + width, species)
+        ax.legend(loc='upper left', ncols=3)
+        ax.set_ylim(0, 250)
 
         plt.show()
+
 
 class HistologiBat(PluginInterface):
     def __init__(self):
