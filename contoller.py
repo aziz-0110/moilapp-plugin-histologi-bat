@@ -176,6 +176,16 @@ class Controller(QWidget):
         plt.title('citra biner')
         return citraBiner
 
+    def morphology(citraBiner):
+        kernel = np.ones((3, 3), np.uint8)
+        pembukaan = cv.morphologyEx(citraBiner, cv.MORPH_OPEN, kernel, iterations=2)
+
+        plt.subplot(243)
+        plt.imshow(pembukaan, cmap="gray", vmin=0, vmax=255)
+        plt.xticks([]), plt.yticks([])
+        plt.title('pembukaan')
+        return pembukaan, kernel
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
