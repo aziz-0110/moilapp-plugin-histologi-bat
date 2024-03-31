@@ -150,6 +150,12 @@ class Controller(QWidget):
         thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
         return thresh
 
+    def morphological_opr(thresh):
+        # membersihkan gambar biner atau menghilangkan noise pada objek
+        img_mop = cv.morphologyEx(thresh, cv.MORPH_OPEN, cv.getStructuringElement(cv.MORPH_ELLIPSE, (50, 50)))
+        img_mop = cv.morphologyEx(img_mop, cv.MORPH_CLOSE, cv.getStructuringElement(cv.MORPH_ELLIPSE, (1, 1)))
+        cv.imwrite("morp.png", img_mop)
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
