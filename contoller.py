@@ -205,6 +205,16 @@ class Controller(QWidget):
         plt.title('latar depan')
         return latarDpn
 
+    def daerahTakBertuan(latarDepan, latarBelakang):
+        latarDepan = np.uint8(latarDepan)
+        daerahTakBertuan = cv.subtract(latarBelakang, latarDepan)
+        plt.subplot(246)
+        plt.imshow(daerahTakBertuan, cmap="gray", vmin=0, vmax=255)
+        plt.xticks([]), plt.yticks([])
+        plt.title('tak bertuan')
+
+        return daerahTakBertuan
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
