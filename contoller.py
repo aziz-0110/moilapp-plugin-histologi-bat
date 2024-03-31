@@ -144,6 +144,11 @@ class Controller(QWidget):
     def cam_params(self):
         self.model.form_camera_parameter()
 
+    def thresholding(img):
+        # konversi gambar abu-abu jadi biner
+        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
+        thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+        return thresh
 
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
