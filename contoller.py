@@ -166,6 +166,16 @@ class Controller(QWidget):
 
         cv.imwrite("revert.png", img)
 
+    def gray(citra):
+        abuAbu = cv.cvtColor(citra, cv.COLOR_BGR2GRAY)
+        ambang, citraBiner = cv.threshold(abuAbu, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+
+        plt.subplot(242)
+        plt.imshow(citraBiner, cmap="gray", vmin=0, vmax=255)
+        plt.xticks([]), plt.yticks([])
+        plt.title('citra biner')
+        return citraBiner
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
