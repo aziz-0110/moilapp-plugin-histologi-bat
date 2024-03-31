@@ -186,6 +186,14 @@ class Controller(QWidget):
         plt.title('pembukaan')
         return pembukaan, kernel
 
+    def latarBelakang(pembukaan, kernel):
+        latarBkg = cv.dilate(pembukaan, kernel, iterations=2)
+        plt.subplot(244)
+        plt.imshow(pembukaan, cmap="gray", vmin=0, vmax=255)
+        plt.xticks([]), plt.yticks([])
+        plt.title('latar belakang')
+        return latarBkg
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
