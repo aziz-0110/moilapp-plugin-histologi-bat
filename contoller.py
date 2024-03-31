@@ -156,6 +156,16 @@ class Controller(QWidget):
         img_mop = cv.morphologyEx(img_mop, cv.MORPH_CLOSE, cv.getStructuringElement(cv.MORPH_ELLIPSE, (1, 1)))
         cv.imwrite("morp.png", img_mop)
 
+    def switch():
+        img = cv.imread("morp.png", 0)
+
+        for i in range(0, img.shape[0]):
+            for j in range(0, img.shape[1]):
+                px = 255 if img[i][j] == 0 else 0
+                img[i][j] = px
+
+        cv.imwrite("revert.png", img)
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
