@@ -221,6 +221,23 @@ class Controller(QWidget):
         print("jumlah koin:", jumObjek - 1)
         return penanda
 
+    def watershed(img, citra, penanda, daerahTakBertuan):
+        penanda = penanda + 1
+        penanda[daerahTakBertuan == 255] = 0
+
+        penanda = cv.watershed(citra, penanda)
+        plt.subplot(247)
+        plt.imshow(penanda, cmap="jet")
+        plt.xticks([]), plt.yticks([])
+        plt.title('penanda')
+
+        img[penanda == -1] = [0, 255, 0]
+        plt.subplot(248)
+        plt.imshow(img[..., :: -1])
+        cv.imwrite("hasil.png", img)
+        plt.xticks([]), plt.yticks([])
+        plt.title('hasil akhir')
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
