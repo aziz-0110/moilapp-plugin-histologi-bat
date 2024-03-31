@@ -113,6 +113,7 @@ class Controller(QWidget):
             self.show_to_ui_img_crop(file)
 
     def show_to_ui_img_1(self, img_path):
+        # self.con
         img = cv2.imread(img_path)
         dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat/saved_img/HFD"
 
@@ -206,7 +207,7 @@ class Controller(QWidget):
         markers = cv2.watershed(image, markers)
 
         cell_count = len(np.unique(markers)) - 1
-        self.ui.label_14.setText(f"\t{cell_count}")
+        # self.ui.label_14.setText(f"\t{cell_count}")
 
         for label in np.unique(markers):
             if label == -1:
@@ -219,6 +220,10 @@ class Controller(QWidget):
             ((x, y), r) = cv2.minEnclosingCircle(c)
             cv2.circle(image, (int(x), int(y)), int(r), (255, 61, 139), 1, 5)
             cv2.putText(image, "{}".format(label), (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 155), 1)
+
+            # diameter = cv2.circle(image, (int(x), int(y)), int(r), (255, 61, 139), 1, 5)
+            # print(diameter)
+            # cv2.putText(image, "{}".format(label), (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 155), 1)
 
         # dir_path = "./plugins/moilapp-plugin-histologi-bat/saved_img"
         img_save_path = f"{dir_path}/count_cell.png"
@@ -235,7 +240,7 @@ class Controller(QWidget):
 
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
-        jmh_crop = 8
+        jmh_crop = 4
 
         # gambar yg sudah di labeling
         img = cv2.imread(img_path)
@@ -280,6 +285,7 @@ class Controller(QWidget):
         return start_crop, end_crop
 
     def graph(self):    # untuk grafik
+
         species = ("Adelie", "Chinstrap", "Gentoo")
         penguin_means = {
             '0,02': (18.35, 18.43, 14.98),
