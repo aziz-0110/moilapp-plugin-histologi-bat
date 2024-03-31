@@ -215,6 +215,12 @@ class Controller(QWidget):
 
         return daerahTakBertuan
 
+    def penanda(latarDepan):
+        latarDepan = np.uint8(latarDepan)
+        jumObjek, penanda = cv.connectedComponents(latarDepan)
+        print("jumlah koin:", jumObjek - 1)
+        return penanda
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
