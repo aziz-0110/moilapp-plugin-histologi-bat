@@ -138,105 +138,12 @@ class Controller(QWidget):
 
         dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat-git/saved_img/crop"
 
-        # gray = self.convert_grayscale(img_path)
-        # thresh = self.thresholding(gray)
-        # morpho = self.morphological_opr(thresh)
-        # cells, cell_count = self.count_cells(img_path, dir_img_save_path)
-
         self.model.show_image_to_label(self.ui.label_ori_1, self.image_original, 620)
         self.crop_img(dir_img_save_path, img_path)
-
-        # self.model.show_image_to_label(self.ui.label_ori_2, self.image_original, 620)
-        # self.model.show_image_to_label(self.ui.label_2_1, gray, 300)
-        # self.model.show_image_to_label(self.ui.label_2_2, thresh, 300)
-        # self.model.show_image_to_label(self.ui.label_2_3, morpho, 300)
-        # self.model.show_image_to_label(self.ui.label_2_4, cells, 300)
-        #
-        # self.ui.label_15.setText(f"{cell_count}")
-
 
     def cam_params(self):
         self.model.form_camera_parameter()
 
-    def convert_grayscale(self, img):
-        # konversi warna gambar jadi abu-abu
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        return gray
-
-    def thresholding(self, gray):
-        # konversi gambar abu-abu jadi biner
-        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-
-        return thresh
-
-    def morphological_opr(self, thresh):
-        # membersihkan gambar biner atau menghilangkan noise pada objek
-        img_mop = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
-        img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
-
-        # perhitungan jarak transformasi
-        D = ndimage.distance_transform_edt(img_mop)
-
-        # # mencari nalai lokal max di jarak tranformasi gambar menggunakan numpy
-        # local_max_coords = np.argwhere((D == ndimage.maximum_filter(D, size=20)) & (D > 0))
-        #
-        # # konversi kodinat lokal max ke bool
-        # localMax = np.zeros(D.shape, dtype=bool)
-        # localMax[tuple(local_max_coords.T)] = True
-        #
-        # markers = ndimage.label(localMax, structure=np.ones((3, 3)))[0]
-        #
-        # # untuk labeling gambar https://pyimagesearch.com/2015/11/02/watershed-opencv/
-        # labels = watershed(-D, markers, mask=img_mop)
-
-        return D
-
-
-    def count_cells(self, image_path, dir_path):
-        image = cv2.imread(image_path)
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
-        img_mop = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
-        img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15, 15)))
-        D = cv2.distanceTransform(img_mop, cv2.DIST_L2, 5)
-        localMax = np.zeros(D.shape, dtype=np.uint8)
-        localMax[thresh == 255] = 255
-        markers = cv2.connectedComponents(localMax)[1]
-        markers = markers + 1
-        markers[thresh == 0] = 0
-        markers = cv2.watershed(image, markers)
-
-        cell_count = len(np.unique(markers)) - 1
-        # self.ui.label_14.setText(f"\t{cell_count}")
-
-        for label in np.unique(markers):
-            if label == -1:
-                continue
-            mask = np.zeros(gray.shape, dtype="uint8")
-            mask[markers == label] = 255
-            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            cnts = imutils.grab_contours(cnts)
-            c = max(cnts, key=cv2.contourArea)
-            ((x, y), r) = cv2.minEnclosingCircle(c)
-            cv2.circle(image, (int(x), int(y)), int(r), (255, 61, 139), 1, 5)
-            cv2.putText(image, "{}".format(label), (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 155), 1)
-
-            # diameter = cv2.circle(image, (int(x), int(y)), int(r), (255, 61, 139), 1, 5)
-            # print(diameter)
-            # cv2.putText(image, "{}".format(label), (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 155), 1)
-
-        # dir_path = "./plugins/moilapp-plugin-histologi-bat/saved_img"
-        img_save_path = f"{dir_path}/count_cell.png"
-
-        if (os.path.exists(f"{dir_path}")):
-            if (os.path.isdir(f"{dir_path}")):
-                os.system(f"rm -R {dir_path}")
-                os.mkdir(f"{dir_path}")
-                cv2.imwrite(img_save_path, image)
-        else:
-            os.mkdir(f"{dir_path}")
-
-        return image, cell_count
 
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
