@@ -194,6 +194,17 @@ class Controller(QWidget):
         plt.title('latar belakang')
         return latarBkg
 
+    def latarDepan(pembukaan):
+        transformjarak = cv.distanceTransform(pembukaan, cv.DIST_L2, cv.DIST_MASK_5)
+        ambang, latarDpn = cv.threshold(transformjarak, 0.24 * transformjarak.max(), 255, cv.THRESH_BINARY)
+
+        plt.subplot(245)
+        cv.imwrite("latarDepan.png", latarDpn)
+        plt.imshow(latarDpn, cmap="gray", vmin=0, vmax=255)
+        plt.xticks([]), plt.yticks([])
+        plt.title('latar depan')
+        return latarDpn
+
     def crop_img(self, dir_path, img_path):
         # jumlah potongan gambar
         jmh_crop = 4
