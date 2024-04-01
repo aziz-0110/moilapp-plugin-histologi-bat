@@ -113,22 +113,31 @@ class Controller(QWidget):
             self.show_to_ui_img_crop(file)
 
     def show_to_ui_img_1(self, img_path):
-        # self.con
-        img = cv2.imread(img_path)
-        dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat/saved_img/HFD"
+        img = img_path
 
-        gray = self.convert_grayscale(img)
-        thresh = self.thresholding(gray)
-        morpho = self.morphological_opr(thresh)
-        cells, cell_count = self.count_cells(img_path, dir_img_save_path)
+        # operasi mengganti objek yg dideteksi
+        thres = self.thresholding(img)
+        self.morphological_opr(thres)
+        self.switch()
+
+        # operasi mendeteksi objek yg telah diganti
+        citra = cv2.imread("revert.png")
+
+        citraBiner = self.gray(citra)
+        pembukaan, kernel = self.morphology(citraBiner)
+        ltrBelakang = self.latarBelakang(pembukaan, kernel)
+        ltrDepan = self.latarDepan(pembukaan)
+        drhTakBertuan = self.daerahTakBertuan(ltrDepan, ltrBelakang)
+        label = self.penanda(ltrDepan)
+        self.watershed(img, citra, label, drhTakBertuan)
 
         self.model.show_image_to_label(self.ui.label_ori_1, self.image_original, 620)
-        self.model.show_image_to_label(self.ui.label_1_1, thresh, 300)
-        self.model.show_image_to_label(self.ui.label_1_2, cells, 300)
-        self.model.show_image_to_label(self.ui.label_1_3, morpho, 300)
+        self.model.show_image_to_label(self.ui.label_1_1, citraBiner, 300)
+        self.model.show_image_to_label(self.ui.label_1_2, drhTakBertuan, 300)
+        self.model.show_image_to_label(self.ui.label_1_3, label, 300)
         # self.model.show_image_to_label(self.ui.label_1_4, , 300)
 
-        self.ui.label_14.setText(f"{cell_count}")
+        # self.ui.label_14.setText(f"{cell_count}")
 
         # self.crop_img(dir_img_save_path)
         self.graph()
@@ -146,29 +155,29 @@ class Controller(QWidget):
 
     def thresholding(img):
         # konversi gambar abu-abu jadi biner
-        gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
-        thresh = cv.threshold(gray, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)[1]
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
         return thresh
 
     def morphological_opr(thresh):
         # membersihkan gambar biner atau menghilangkan noise pada objek
-        img_mop = cv.morphologyEx(thresh, cv.MORPH_OPEN, cv.getStructuringElement(cv.MORPH_ELLIPSE, (50, 50)))
-        img_mop = cv.morphologyEx(img_mop, cv.MORPH_CLOSE, cv.getStructuringElement(cv.MORPH_ELLIPSE, (1, 1)))
-        cv.imwrite("morp.png", img_mop)
+        img_mop = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (50, 50)))
+        img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
+        cv2.imwrite("morp.png", img_mop)
 
     def switch():
-        img = cv.imread("morp.png", 0)
+        img = cv2.imread("morp.png", 0)
 
         for i in range(0, img.shape[0]):
             for j in range(0, img.shape[1]):
                 px = 255 if img[i][j] == 0 else 0
                 img[i][j] = px
 
-        cv.imwrite("revert.png", img)
+        cv2.imwrite("revert.png", img)
 
     def gray(citra):
-        abuAbu = cv.cvtColor(citra, cv.COLOR_BGR2GRAY)
-        ambang, citraBiner = cv.threshold(abuAbu, 0, 255, cv.THRESH_BINARY_INV + cv.THRESH_OTSU)
+        abuAbu = cv2.cvtColor(citra, cv2.COLOR_BGR2GRAY)
+        ambang, citraBiner = cv2.threshold(abuAbu, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
 
         plt.subplot(242)
         plt.imshow(citraBiner, cmap="gray", vmin=0, vmax=255)
@@ -178,7 +187,7 @@ class Controller(QWidget):
 
     def morphology(citraBiner):
         kernel = np.ones((3, 3), np.uint8)
-        pembukaan = cv.morphologyEx(citraBiner, cv.MORPH_OPEN, kernel, iterations=2)
+        pembukaan = cv2.morphologyEx(citraBiner, cv2.MORPH_OPEN, kernel, iterations=2)
 
         plt.subplot(243)
         plt.imshow(pembukaan, cmap="gray", vmin=0, vmax=255)
@@ -187,7 +196,7 @@ class Controller(QWidget):
         return pembukaan, kernel
 
     def latarBelakang(pembukaan, kernel):
-        latarBkg = cv.dilate(pembukaan, kernel, iterations=2)
+        latarBkg = cv2.dilate(pembukaan, kernel, iterations=2)
         plt.subplot(244)
         plt.imshow(pembukaan, cmap="gray", vmin=0, vmax=255)
         plt.xticks([]), plt.yticks([])
@@ -195,11 +204,11 @@ class Controller(QWidget):
         return latarBkg
 
     def latarDepan(pembukaan):
-        transformjarak = cv.distanceTransform(pembukaan, cv.DIST_L2, cv.DIST_MASK_5)
-        ambang, latarDpn = cv.threshold(transformjarak, 0.24 * transformjarak.max(), 255, cv.THRESH_BINARY)
+        transformjarak = cv2.distanceTransform(pembukaan, cv2.DIST_L2, cv2.DIST_MASK_5)
+        ambang, latarDpn = cv2.threshold(transformjarak, 0.24 * transformjarak.max(), 255, cv2.THRESH_BINARY)
 
         plt.subplot(245)
-        cv.imwrite("latarDepan.png", latarDpn)
+        cv2.imwrite("latarDepan.png", latarDpn)
         plt.imshow(latarDpn, cmap="gray", vmin=0, vmax=255)
         plt.xticks([]), plt.yticks([])
         plt.title('latar depan')
@@ -207,7 +216,7 @@ class Controller(QWidget):
 
     def daerahTakBertuan(latarDepan, latarBelakang):
         latarDepan = np.uint8(latarDepan)
-        daerahTakBertuan = cv.subtract(latarBelakang, latarDepan)
+        daerahTakBertuan = cv2.subtract(latarBelakang, latarDepan)
         plt.subplot(246)
         plt.imshow(daerahTakBertuan, cmap="gray", vmin=0, vmax=255)
         plt.xticks([]), plt.yticks([])
@@ -217,7 +226,7 @@ class Controller(QWidget):
 
     def penanda(latarDepan):
         latarDepan = np.uint8(latarDepan)
-        jumObjek, penanda = cv.connectedComponents(latarDepan)
+        jumObjek, penanda = cv2.connectedComponents(latarDepan)
         print("jumlah koin:", jumObjek - 1)
         return penanda
 
@@ -225,7 +234,7 @@ class Controller(QWidget):
         penanda = penanda + 1
         penanda[daerahTakBertuan == 255] = 0
 
-        penanda = cv.watershed(citra, penanda)
+        penanda = cv2.watershed(citra, penanda)
         plt.subplot(247)
         plt.imshow(penanda, cmap="jet")
         plt.xticks([]), plt.yticks([])
@@ -234,7 +243,7 @@ class Controller(QWidget):
         img[penanda == -1] = [0, 255, 0]
         plt.subplot(248)
         plt.imshow(img[..., :: -1])
-        cv.imwrite("hasil.png", img)
+        cv2.imwrite("hasil.png", img)
         plt.xticks([]), plt.yticks([])
         plt.title('hasil akhir')
 
