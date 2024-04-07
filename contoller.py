@@ -21,8 +21,13 @@ class Controller(QWidget):
         self.set_stylesheet()
 
     def set_stylesheet(self):
-        self.ui.label_ori_1.setStyleSheet(self.model.style_label())
-           
+        self.ui.img_ori.setStyleSheet(self.model.style_frame_object())
+        self.ui.img_thres.setStyleSheet(self.model.style_label())
+        self.ui.img_morph.setStyleSheet(self.model.style_label())
+        self.ui.img_canny.setStyleSheet(self.model.style_label())
+        self.ui.img_label.setStyleSheet(self.model.style_label())
+        self.ui.img_grafik.setStyleSheet(self.model.style_label())
+
 
     # def clearImg(self):
 
