@@ -21,13 +21,27 @@ class Controller(QWidget):
         self.set_stylesheet()
 
     def set_stylesheet(self):
-        self.ui.img_ori.setStyleSheet(self.model.style_frame_object())
+        self.ui.label.setStyleSheet(self.model.style_label())
+        self.ui.label_2.setStyleSheet(self.model.style_label())
+        self.ui.label_7.setStyleSheet(self.model.style_label())
+        self.ui.label_4.setStyleSheet(self.model.style_label())
+        self.ui.label_5.setStyleSheet(self.model.style_label())
+        self.ui.label_6.setStyleSheet(self.model.style_label())
+
+        self.ui.img_grafik.setStyleSheet(self.model.style_label())
+        self.ui.img_ori.setStyleSheet(self.model.style_label())
         self.ui.img_thres.setStyleSheet(self.model.style_label())
         self.ui.img_morph.setStyleSheet(self.model.style_label())
         self.ui.img_canny.setStyleSheet(self.model.style_label())
         self.ui.img_label.setStyleSheet(self.model.style_label())
-        self.ui.img_grafik.setStyleSheet(self.model.style_label())
 
+        self.ui.btn_load.setStyleSheet(self.model.style_pushbutton())
+        self.ui.btn_clear.setStyleSheet(self.model.style_pushbutton())
+        self.ui.btn_crop.setStyleSheet(self.model.style_pushbutton())
+        self.ui.btn_save.setStyleSheet(self.model.style_pushbutton())
+
+        self.ui.btn_load.clicked.connect(self.load_image_1)
+        self.ui.btn_crop.clicked.connect(self.load_image_crop)
 
     # def clearImg(self):
 
@@ -54,10 +68,29 @@ class Controller(QWidget):
             self.show_to_ui_img_crop(file)
 
     def show_to_ui_img_1(self, img_path):
-        # self.con
         img = cv2.imread(img_path)
+        size = 400
 
-        self.graph()
+        self.morp_opr(img)
+
+        img_morp = cv2.imread("./plugins/moilapp-plugin-histologi-bat/saved_img/morp.png")
+
+        self.model.show_image_to_label(self.ui.img_ori, img, size)
+        self.model.show_image_to_label(self.ui.img_morph, img_morp, size)
+        # self.model.show_image_to_label(self.ui.img_morph, img_mop, size)
+
+
+        # self.graph()
+
+    def morp_opr(self, img):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+
+        img_mop = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (50, 50)))
+        img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
+        cv2.imwrite("./plugins/moilapp-plugin-histologi-bat/saved_img/morp.png", img_mop)
+
+        # return img_mop
 
     def show_to_ui_img_crop(self, img_path):
         dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat-git/saved_img/crop"

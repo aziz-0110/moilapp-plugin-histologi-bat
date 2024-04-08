@@ -4,7 +4,6 @@ import numpy as np
 img = cv2.imread("../historical_function/img_crop_1_1.png")
 
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
 threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
 
 img_mop = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (50, 50)))
@@ -15,7 +14,6 @@ for i in range(0, revert.shape[0]):
     for j in range(0, revert.shape[1]):
         px = 255 if revert[i][j] == 0 else 0
         revert[i][j] = px
-
 cv2.imwrite("revert.png", revert)
 canny = cv2.Canny(revert, 100, 200)
 
