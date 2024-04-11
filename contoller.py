@@ -177,6 +177,31 @@ class Controller(QWidget):
         else:
             os.mkdir(f"{path_dir}")
 
+    def crop_img(self, dir_path, img_path):
+        # jumlah potongan gambar
+        jmh_crop = 4
+
+        # gambar yg sudah di labeling
+        img = cv2.imread(img_path)
+        height, width = img.shape[:2]
+
+        # menghitung ukuran gambar untuk dipotong
+        row_start, row_end = self.count_crop_img(jmh_crop, height)
+        col_start, col_end = self.count_crop_img(jmh_crop, width)
+
+        # img_save_path = f"{dir_path}/count_cell.png"
+
+        self.checkDir(dir_path)
+
+        for i in range(0, jmh_crop):
+            for j in range(0, jmh_crop):
+                # memotong gambar
+                cropped = img[row_start[i]:row_end[i], col_start[j]:col_end[j]]
+
+                # menyimpan gambar
+                cv2.imwrite(f"{dir_path}/img_crop_{i + 1}_{j + 1}.png", cropped)
+
+
 
 class HistologiBat(PluginInterface):
     def __init__(self):
