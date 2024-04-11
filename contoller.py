@@ -161,7 +161,7 @@ class Controller(QWidget):
             # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
 
     def show_to_ui_img_crop(self, img_path):
-        dir_img_save_path = f"{self.path_img_save}crop"
+        dir_img_save_path = f"{self.path_img_save}/crop"
 
         self.checkDir(dir_img_save_path)
 
