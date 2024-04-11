@@ -126,6 +126,41 @@ class Controller(QWidget):
         cv2.imwrite(f"{self.path_img_save}/tmp/switch-obj.png", img_morp)
         # return  img_morp
 
+    def labelling(self, switch_obj):
+        # morph = cv2.imread(f"{self.path_img_save}morp.png")
+        canny = cv2.Canny(switch_obj, 100, 200)
+        cv2.imwrite(f"{self.path_img_save}/tmp/canny.png", canny)
+
+        kontur1, _ = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        cv2.drawContours(self.image_original, kontur1, -1, (0, 255, 0), 5)
+
+    def count_cell(self):
+        img_switch = cv2.imread(f"{self.path_img_save}/tmp/switch-obj.png")
+        gray = cv2.cvtColor(img_switch, cv2.COLOR_BGR2GRAY)
+        threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+
+        kernel = np.ones((3, 3), np.uint8)
+        mop_open = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, kernel, iterations=2)
+
+        # dilate = cv2.dilate(mop_open, kernel, iterations=2)
+
+        distance_trans = cv2.distanceTransform(mop_open, cv2.DIST_L2, cv2.DIST_MASK_5)
+        dist_thres = cv2.threshold(distance_trans, 0.24 * distance_trans.max(), 255, cv2.THRESH_BINARY)[1]
+        cv2.imwrite(f"{self.path_img_save}/tmp/distance.png", dist_thres)
+
+        img_distace = cv2.imread(f"{self.path_img_save}/tmp/distance.png", 0)
+        kontur2, _ = cv2.findContours(img_distace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        # mc = 264.5833  # 1 px = 264.5833 micrometer
+        self.ui.lbl_cell.setText(f"{len(kontur2)}")
+
+        for i in range(0, len(kontur2)):
+            ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
+            wide = cv2.contourArea(kontur2[i], False)
+            if wide == 0: continue
+            cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+
+
 
 class HistologiBat(PluginInterface):
     def __init__(self):
