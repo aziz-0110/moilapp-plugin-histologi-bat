@@ -160,6 +160,14 @@ class Controller(QWidget):
             cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
             # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
 
+    def show_to_ui_img_crop(self, img_path):
+        dir_img_save_path = f"{self.path_img_save}crop"
+
+        self.checkDir(dir_img_save_path)
+
+        self.model.show_image_to_label(self.ui.img_ori, self.image_original, 620)
+        self.crop_img(dir_img_save_path, img_path)
+
 
 
 class HistologiBat(PluginInterface):
