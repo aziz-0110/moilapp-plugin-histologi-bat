@@ -9,6 +9,8 @@ __pycache__/
 # Distribution / packaging
 Histologi/
 src/
+img_save/
+img_tmp/
 .Python
 build/
 develop-eggs/

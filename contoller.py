@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 import imutils
 import matplotlib.pyplot as plt
+import shutil
 
 class Controller(QWidget):
     def __init__(self, model):
@@ -18,7 +19,7 @@ class Controller(QWidget):
         self.model = model
         self.image = None
         self.render_image = False   # variabel agar tidak bisa load img ketika sudah ada img
-        self.path_img_save = "./plugins/moilapp-plugin-histologi-bat/src/tmp"
+        self.path_img_save = "./plugins/moilapp-plugin-histologi-bat/img_tmp"
         self.set_stylesheet()
 
     def set_stylesheet(self):
@@ -46,10 +47,18 @@ class Controller(QWidget):
         self.ui.btn_load.clicked.connect(self.load_image_1)
         self.ui.btn_crop.clicked.connect(self.load_image_crop)
         self.ui.btn_clear.clicked.connect(self.clearImg)
+        self.ui.btn_save.clicked.connect(self.save_img)
 
-        self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/src/")
+        # self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/img_tmp")
 
         self.checkDir(self.path_img_save)
+
+    def save_img(self):
+        if self.render_image == False: return
+
+        if os.path.exists("./plugins/moilapp-plugin-histologi-bat/img_save"):
+            os.system("rm -R ./plugins/moilapp-plugin-histologi-bat/img_save")
+        shutil.copytree(f"{self.path_img_save}", "./plugins/moilapp-plugin-histologi-bat/img_save/")
 
     def clearImg(self):
         self.ui.img_ori.clear()
