@@ -201,6 +201,23 @@ class Controller(QWidget):
                 # menyimpan gambar
                 cv2.imwrite(f"{dir_path}/img_crop_{i + 1}_{j + 1}.png", cropped)
 
+    def count_crop_img(self, jmh_crop, size_img):
+        # menghitung dimensi gambar yg akan dipotong sesuai kebutuhan
+        start_crop = []
+        end_crop = []
+
+        # perhitungan ukuran potongan gambar
+        size_crop = int(size_img / jmh_crop)
+        for i in range(0, jmh_crop + 1):
+            # fungsi append untuk menambahkan nilai list
+            end_crop.append(i * size_crop)
+            start_crop.append(end_crop[i] - size_crop)
+
+        # fungsi pop untuk menhapus list index 0
+        start_crop.pop(0)
+        end_crop.pop(0)
+        return start_crop, end_crop
+
 
 
 class HistologiBat(PluginInterface):
