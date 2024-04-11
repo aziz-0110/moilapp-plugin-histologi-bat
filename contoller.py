@@ -18,7 +18,7 @@ class Controller(QWidget):
         self.model = model
         self.image = None
         self.render_image = False   # variabel agar tidak bisa load img ketika sudah ada img
-        self.path_img_save = "./plugins/moilapp-plugin-histologi-bat/src"
+        self.path_img_save = "./plugins/moilapp-plugin-histologi-bat/src/tmp"
         self.set_stylesheet()
 
     def set_stylesheet(self):
@@ -47,7 +47,9 @@ class Controller(QWidget):
         self.ui.btn_crop.clicked.connect(self.load_image_crop)
         self.ui.btn_clear.clicked.connect(self.clearImg)
 
-        self.checkDir(f"{self.path_img_save}")
+        self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/src/")
+
+        self.checkDir(self.path_img_save)
 
     def clearImg(self):
         self.ui.img_ori.clear()
@@ -56,6 +58,7 @@ class Controller(QWidget):
         self.ui.img_label.clear()
         self.ui.img_grafik.clear()
         self.ui.img_canny.clear()
+        self.ui.lbl_cell.clear()
         self.image_original = None
         self.image = self.image_original
         self.render_image = False
@@ -73,6 +76,7 @@ class Controller(QWidget):
                 self.show_to_ui_img_1(file)
 
     def load_image_crop(self):
+        if self.render_image: return
         self.checkDir(f"{self.path_img_save}/crop")
         file = self.model.select_file()
         if file:
@@ -80,22 +84,23 @@ class Controller(QWidget):
                 self.moildev = self.model.connect_to_moildev(parameter_name=file)
             self.image_original = cv2.imread(file)
             self.image = self.image_original.copy()
+            self.render_image = True
             self.show_to_ui_img_crop(file)
 
     def show_to_ui_img_1(self, img_path):
-        self.checkDir(f"{self.path_img_save}/tmp")
+        self.checkDir(f"{self.path_img_save}/img_processing")
         img = cv2.imread(img_path)
         size = 400
 
         self.morp_opr(img)
 
-        switch_obj = cv2.imread(f"{self.path_img_save}/tmp/switch-obj.png")
+        switch_obj = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
 
         self.labelling(switch_obj)
         self.count_cell()
 
-        canny = cv2.imread(f"{self.path_img_save}/tmp/canny.png")
-        distace = cv2.imread(f"{self.path_img_save}/tmp/distance.png")
+        canny = cv2.imread(f"{self.path_img_save}/img_processing/canny.png")
+        distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png")
 
         self.model.show_image_to_label(self.ui.img_ori, img, size)
         self.model.show_image_to_label(self.ui.img_morph, switch_obj, size)
@@ -104,7 +109,7 @@ class Controller(QWidget):
         self.model.show_image_to_label(self.ui.img_label, self.image_original, size)
 
         self.graph()
-        graph = cv2.imread(f"{self.path_img_save}/tmp/graph.png")
+        graph = cv2.imread(f"{self.path_img_save}/img_processing/graph.png")
         self.model.show_image_to_label(self.ui.img_grafik, graph, size)
         plt.close("all")
 
@@ -114,7 +119,7 @@ class Controller(QWidget):
 
         img_mop = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (50, 50)))
         img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
-        cv2.imwrite(f"{self.path_img_save}/tmp/morp.png", img_mop)
+        cv2.imwrite(f"{self.path_img_save}/img_processing/morp.png", img_mop)
 
         # switch objek
         img_morp = img_mop.copy()
@@ -122,29 +127,29 @@ class Controller(QWidget):
             for j in range(0, img_morp.shape[1]):
                 px = 255 if img_morp[i][j] == 0 else 0
                 img_morp[i][j] = px
-        cv2.imwrite(f"{self.path_img_save}/tmp/switch-obj.png", img_morp)
+        cv2.imwrite(f"{self.path_img_save}/img_processing/switch-obj.png", img_morp)
 
         # return img_mop
 
     def switch_obj(self):
-        img_morp = cv2.imread(f"{self.path_img_save}/tmp/morp.png", 0)
+        img_morp = cv2.imread(f"{self.path_img_save}/img_processing/morp.png", 0)
         for i in range(0, img_morp.shape[0]):
             for j in range(0, img_morp.shape[1]):
                 px = 255 if img_morp[i][j] == 0 else 0
                 img_morp[i][j] = px
-        cv2.imwrite(f"{self.path_img_save}/tmp/switch-obj.png", img_morp)
+        cv2.imwrite(f"{self.path_img_save}/img_processing/switch-obj.png", img_morp)
         # return  img_morp
 
     def labelling(self, switch_obj):
         # morph = cv2.imread(f"{self.path_img_save}morp.png")
         canny = cv2.Canny(switch_obj, 100, 200)
-        cv2.imwrite(f"{self.path_img_save}/tmp/canny.png", canny)
+        cv2.imwrite(f"{self.path_img_save}/img_processing/canny.png", canny)
 
         kontur1, _ = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(self.image_original, kontur1, -1, (0, 255, 0), 5)
 
     def count_cell(self):
-        img_switch = cv2.imread(f"{self.path_img_save}/tmp/switch-obj.png")
+        img_switch = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
         gray = cv2.cvtColor(img_switch, cv2.COLOR_BGR2GRAY)
         threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
@@ -155,9 +160,9 @@ class Controller(QWidget):
 
         distance_trans = cv2.distanceTransform(mop_open, cv2.DIST_L2, cv2.DIST_MASK_5)
         dist_thres = cv2.threshold(distance_trans, 0.24 * distance_trans.max(), 255, cv2.THRESH_BINARY)[1]
-        cv2.imwrite(f"{self.path_img_save}/tmp/distance.png", dist_thres)
+        cv2.imwrite(f"{self.path_img_save}/img_processing/distance.png", dist_thres)
 
-        img_distace = cv2.imread(f"{self.path_img_save}/tmp/distance.png", 0)
+        img_distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png", 0)
         kontur2, _ = cv2.findContours(img_distace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # mc = 264.5833  # 1 px = 264.5833 micrometer
         self.ui.lbl_cell.setText(f"{len(kontur2)}")
@@ -251,7 +256,7 @@ class Controller(QWidget):
         cxy, f = axs[1].cohere(s1, s2, 256, 1. / dt)
         axs[1].set_ylabel('Coherence')
 
-        plt.savefig(f"{self.path_img_save}/tmp/graph.png")
+        plt.savefig(f"{self.path_img_save}/img_processing/graph.png")
 
         plt.show()
 
