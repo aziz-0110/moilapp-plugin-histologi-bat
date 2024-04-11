@@ -168,6 +168,14 @@ class Controller(QWidget):
         self.model.show_image_to_label(self.ui.img_ori, self.image_original, 620)
         self.crop_img(dir_img_save_path, img_path)
 
+    def checkDir(self, path_dir):
+        if (os.path.exists(f"{path_dir}")):
+            if (os.path.isdir(f"{path_dir}")):
+                os.system(f"rm -R {path_dir}")
+                os.mkdir(f"{path_dir}")
+                # cv2.imwrite(img_save_path, image)
+        else:
+            os.mkdir(f"{path_dir}")
 
 
 class HistologiBat(PluginInterface):
