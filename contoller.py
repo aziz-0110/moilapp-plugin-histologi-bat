@@ -45,11 +45,20 @@ class Controller(QWidget):
 
         self.ui.btn_load.clicked.connect(self.load_image_1)
         self.ui.btn_crop.clicked.connect(self.load_image_crop)
+        self.ui.btn_clear.clicked.connect(self.clearImg)
 
         self.checkDir(f"{self.path_img_save}")
 
-    # def clearImg(self):
-
+    def clearImg(self):
+        self.ui.img_ori.clear()
+        self.ui.img_morph.clear()
+        self.ui.img_dist.clear()
+        self.ui.img_label.clear()
+        self.ui.img_grafik.clear()
+        self.ui.img_canny.clear()
+        self.image_original = None
+        self.image = self.image_original
+        self.render_image = False
 
     def load_image_1(self):
         if self.render_image: return    # kalo true bakal kembali
