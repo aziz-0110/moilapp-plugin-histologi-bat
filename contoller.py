@@ -18,19 +18,22 @@ class Controller(QWidget):
         self.model = model
         self.image = None
         self.render_image = False   # variabel agar tidak bisa load img ketika sudah ada img
+        self.path_img_save = "./plugins/moilapp-plugin-histologi-bat/src"
         self.set_stylesheet()
 
     def set_stylesheet(self):
         self.ui.label.setStyleSheet(self.model.style_label())
         self.ui.label_2.setStyleSheet(self.model.style_label())
-        self.ui.label_7.setStyleSheet(self.model.style_label())
         self.ui.label_4.setStyleSheet(self.model.style_label())
         self.ui.label_5.setStyleSheet(self.model.style_label())
         self.ui.label_6.setStyleSheet(self.model.style_label())
+        self.ui.label_7.setStyleSheet(self.model.style_label())
+        self.ui.label_8.setStyleSheet(self.model.style_font_12())
+        self.ui.lbl_cell.setStyleSheet(self.model.style_font_12())
 
         self.ui.img_grafik.setStyleSheet(self.model.style_label())
         self.ui.img_ori.setStyleSheet(self.model.style_label())
-        self.ui.img_thres.setStyleSheet(self.model.style_label())
+        self.ui.img_dist.setStyleSheet(self.model.style_label())
         self.ui.img_morph.setStyleSheet(self.model.style_label())
         self.ui.img_canny.setStyleSheet(self.model.style_label())
         self.ui.img_label.setStyleSheet(self.model.style_label())
@@ -42,6 +45,8 @@ class Controller(QWidget):
 
         self.ui.btn_load.clicked.connect(self.load_image_1)
         self.ui.btn_crop.clicked.connect(self.load_image_crop)
+
+        self.checkDir(f"{self.path_img_save}")
 
     # def clearImg(self):
 
@@ -59,6 +64,7 @@ class Controller(QWidget):
                 self.show_to_ui_img_1(file)
 
     def load_image_crop(self):
+        self.checkDir(f"{self.path_img_save}/crop")
         file = self.model.select_file()
         if file:
             if file:
@@ -68,19 +74,30 @@ class Controller(QWidget):
             self.show_to_ui_img_crop(file)
 
     def show_to_ui_img_1(self, img_path):
+        self.checkDir(f"{self.path_img_save}/tmp")
         img = cv2.imread(img_path)
         size = 400
 
         self.morp_opr(img)
 
-        img_morp = cv2.imread("./plugins/moilapp-plugin-histologi-bat/saved_img/morp.png")
+        switch_obj = cv2.imread(f"{self.path_img_save}/tmp/switch-obj.png")
+
+        self.labelling(switch_obj)
+        self.count_cell()
+
+        canny = cv2.imread(f"{self.path_img_save}/tmp/canny.png")
+        distace = cv2.imread(f"{self.path_img_save}/tmp/distance.png")
 
         self.model.show_image_to_label(self.ui.img_ori, img, size)
-        self.model.show_image_to_label(self.ui.img_morph, img_morp, size)
-        # self.model.show_image_to_label(self.ui.img_morph, img_mop, size)
+        self.model.show_image_to_label(self.ui.img_morph, switch_obj, size)
+        self.model.show_image_to_label(self.ui.img_canny, canny, size)
+        self.model.show_image_to_label(self.ui.img_dist, distace, size)
+        self.model.show_image_to_label(self.ui.img_label, self.image_original, size)
 
-
-        # self.graph()
+        self.graph()
+        graph = cv2.imread(f"{self.path_img_save}/tmp/graph.png")
+        self.model.show_image_to_label(self.ui.img_grafik, graph, size)
+        plt.close("all")
 
     def morp_opr(self, img):
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -88,91 +105,26 @@ class Controller(QWidget):
 
         img_mop = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (50, 50)))
         img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
-        cv2.imwrite("./plugins/moilapp-plugin-histologi-bat/saved_img/morp.png", img_mop)
+        cv2.imwrite(f"{self.path_img_save}/tmp/morp.png", img_mop)
+
+        # switch objek
+        img_morp = img_mop.copy()
+        for i in range(0, img_morp.shape[0]):
+            for j in range(0, img_morp.shape[1]):
+                px = 255 if img_morp[i][j] == 0 else 0
+                img_morp[i][j] = px
+        cv2.imwrite(f"{self.path_img_save}/tmp/switch-obj.png", img_morp)
 
         # return img_mop
 
-    def show_to_ui_img_crop(self, img_path):
-        dir_img_save_path = "./plugins/moilapp-plugin-histologi-bat-git/saved_img/crop"
-
-        self.model.show_image_to_label(self.ui.label_ori_1, self.image_original, 620)
-        self.crop_img(dir_img_save_path, img_path)
-
-    def crop_img(self, dir_path, img_path):
-        # jumlah potongan gambar
-        jmh_crop = 4
-
-        # gambar yg sudah di labeling
-        img = cv2.imread(img_path)
-        height, width = img.shape[:2]
-
-        # menghitung ukuran gambar untuk dipotong
-        row_start, row_end = self.count_crop_img(jmh_crop, height)
-        col_start, col_end = self.count_crop_img(jmh_crop, width)
-
-        # img_save_path = f"{dir_path}/count_cell.png"
-
-        if (os.path.exists(f"{dir_path}")):
-            if (os.path.isdir(f"{dir_path}")):
-                os.system(f"rm -R {dir_path}")
-                os.mkdir(f"{dir_path}")
-                # cv2.imwrite(img_save_path, image)
-        else:
-            os.mkdir(f"{dir_path}")
-
-        for i in range(0, jmh_crop):
-            for j in range(0, jmh_crop):
-                # memotong gambar
-                cropped = img[row_start[i]:row_end[i], col_start[j]:col_end[j]]
-
-                # menyimpan gambar
-                cv2.imwrite(f"{dir_path}/img_crop_{i + 1}_{j + 1}.png", cropped)
-
-    def count_crop_img(self, jmh_crop, size_img):
-        start_crop = []
-        end_crop = []
-
-        # perhitungan ukuran potongan gambar
-        size_crop = int(size_img / jmh_crop)
-        for i in range(0, jmh_crop + 1):
-            # fungsi append untuk menambahkan nilai list
-            end_crop.append(i * size_crop)
-            start_crop.append(end_crop[i] - size_crop)
-
-        # fungsi pop untuk menhapus list index 0
-        start_crop.pop(0)
-        end_crop.pop(0)
-        return start_crop, end_crop
-
-    def graph(self):    # untuk grafik
-
-        species = ("Adelie", "Chinstrap", "Gentoo")
-        penguin_means = {
-            '0,02': (18.35, 18.43, 14.98),
-            '0,01': (38.79, 48.83, 47.50),
-            '0,03': (189.95, 195.82, 217.19),
-        }
-
-        x = np.arange(len(species))  # the label locations
-        width = 0.25  # the width of the bars
-        multiplier = 0
-
-        fig, ax = plt.subplots(layout='constrained')
-
-        for attribute, measurement in penguin_means.items():
-            offset = width * multiplier
-            rects = ax.bar(x + offset, measurement, width, label=attribute)
-            ax.bar_label(rects, padding=3)
-            multiplier += 1
-
-        # Add some text for labels, title and custom x-axis tick labels, etc.
-        ax.set_ylabel('Length (mm)')
-        ax.set_title('Penguin attributes by species')
-        ax.set_xticks(x + width, species)
-        ax.legend(loc='upper left', ncols=3)
-        ax.set_ylim(0, 250)
-
-        plt.show()
+    def switch_obj(self):
+        img_morp = cv2.imread(f"{self.path_img_save}/tmp/morp.png", 0)
+        for i in range(0, img_morp.shape[0]):
+            for j in range(0, img_morp.shape[1]):
+                px = 255 if img_morp[i][j] == 0 else 0
+                img_morp[i][j] = px
+        cv2.imwrite(f"{self.path_img_save}/tmp/switch-obj.png", img_morp)
+        # return  img_morp
 
 
 class HistologiBat(PluginInterface):
