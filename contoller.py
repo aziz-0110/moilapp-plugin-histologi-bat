@@ -20,6 +20,8 @@ class Controller(QWidget):
         self.image = None
         self.render_image = False   # variabel agar tidak bisa load img ketika sudah ada img
         self.path_img_save = "./plugins/moilapp-plugin-histologi-bat/img_tmp"
+        self.x_point = []
+        self.y_point = []
         self.set_stylesheet()
 
     def set_stylesheet(self):
@@ -176,12 +178,15 @@ class Controller(QWidget):
         # mc = 264.5833  # 1 px = 264.5833 micrometer
         self.ui.lbl_cell.setText(f"{len(kontur2)}")
 
+
         for i in range(0, len(kontur2)):
             ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
             wide = cv2.contourArea(kontur2[i], False)
             if wide == 0: continue
             cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
             # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            self.x_point.append(int(i + 1))
+            self.y_point.append(int(wide))
 
     def show_to_ui_img_crop(self, img_path):
         dir_img_save_path = f"{self.path_img_save}/crop"
@@ -242,28 +247,10 @@ class Controller(QWidget):
         return start_crop, end_crop
 
     def graph(self):    # untuk grafik
+        xPoit = np.array(self.x_point)
+        yPoit = np.array(self.y_point)
 
-        # Fixing random state for reproducibility
-        np.random.seed(19680801)
-
-        dt = 0.01
-        t = np.arange(0, 30, dt)
-        nse1 = np.random.randn(len(t))                 # white noise 1
-        nse2 = np.random.randn(len(t))                 # white noise 2
-
-        # Two signals with a coherent part at 10 Hz and a random part
-        s1 = np.sin(2 * np.pi * 10 * t) + nse1
-        s2 = np.sin(2 * np.pi * 10 * t) + nse2
-
-        fig, axs = plt.subplots(2, 1, layout='constrained')
-        axs[0].plot(t, s1, t, s2)
-        axs[0].set_xlim(0, 2)
-        axs[0].set_xlabel('Time (s)')
-        axs[0].set_ylabel('s1 and s2')
-        axs[0].grid(True)
-
-        cxy, f = axs[1].cohere(s1, s2, 256, 1. / dt)
-        axs[1].set_ylabel('Coherence')
+        plt.plot(xPoit, yPoit)
 
         plt.savefig(f"{self.path_img_save}/img_processing/graph.png")
 
