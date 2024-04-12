@@ -1,13 +1,9 @@
 from src.plugin_interface import PluginInterface
 from PyQt6.QtWidgets import QWidget
-from PyQt6 import QtGui
 from .ui_main import Ui_Form
-from skimage.segmentation import watershed
-from scipy import ndimage
 import os
 import cv2
 import numpy as np
-import imutils
 import matplotlib.pyplot as plt
 import shutil
 
@@ -73,6 +69,8 @@ class Controller(QWidget):
         self.image_original = None
         self.image = self.image_original
         self.render_image = False
+        self.x_point = []
+        self.y_point = []
 
     def load_image_1(self):
         if self.render_image: return    # kalo true bakal kembali
@@ -247,10 +245,10 @@ class Controller(QWidget):
         return start_crop, end_crop
 
     def graph(self):    # untuk grafik
-        xPoit = np.array(self.x_point)
-        yPoit = np.array(self.y_point)
+        # xPoit = np.array(self.x_point)
+        # yPoit = np.array(self.y_point)
 
-        plt.plot(xPoit, yPoit)
+        plt.plot(self.x_point, self.y_point)
 
         plt.savefig(f"{self.path_img_save}/img_processing/graph.png")
 
