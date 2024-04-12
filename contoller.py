@@ -252,7 +252,7 @@ class Controller(QWidget):
 
         plt.savefig(f"{self.path_img_save}/img_processing/graph.png")
 
-        plt.show()
+        # plt.show()
 
 class HistologiBat(PluginInterface):
     def __init__(self):
