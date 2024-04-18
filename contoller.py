@@ -31,10 +31,6 @@ class Controller(QWidget):
         self.ui.label_5.setStyleSheet(self.model.style_label())
         self.ui.label_6.setStyleSheet(self.model.style_label())
         self.ui.label_7.setStyleSheet(self.model.style_label())
-        self.ui.label_8.setStyleSheet(self.model.style_font_12())
-        self.ui.lbl_cell.setStyleSheet(self.model.style_font_12())
-        self.ui.label_8.hide()
-        self.ui.lbl_cell.hide()
 
         self.ui.frame_3.setStyleSheet(self.model.style_frame_main())
         self.ui.frame_5.setStyleSheet(self.model.style_frame_object())
@@ -79,7 +75,6 @@ class Controller(QWidget):
         self.ui.img_label.clear()
         self.ui.img_grafik.clear()
         self.ui.img_canny.clear()
-        self.ui.lbl_cell.clear()
         self.image_original = None
         self.image = self.image_original
         self.render_image = False
@@ -116,6 +111,10 @@ class Controller(QWidget):
         size = 400
 
         # self.ui.btn_save.hasMouseTracking()
+        self.ui.frame_7.show()
+        self.ui.img_grafik.show()
+        self.ui.label_7.show()
+        self.ui.label.show()
 
         self.morp_opr(img)
 
@@ -190,8 +189,6 @@ class Controller(QWidget):
         img_distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png", 0)
         kontur2, _ = cv2.findContours(img_distace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # mc = 264.5833  # 1 px = 264.5833 micrometer
-        self.ui.lbl_cell.setText(f"{len(kontur2)}")
-
 
         for i in range(0, len(kontur2)):
             ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
@@ -207,7 +204,12 @@ class Controller(QWidget):
 
         self.checkDir(dir_img_save_path)
 
-        self.model.show_image_to_label(self.ui.img_ori, self.image_original, 620)
+        self.ui.frame_7.hide()
+        self.ui.img_grafik.hide()
+        self.ui.label_7.hide()
+        self.ui.label.hide()
+
+        self.model.show_image_to_label(self.ui.img_label, self.image_original, 620)
         self.crop_img(dir_img_save_path, img_path)
 
     def checkDir(self, path_dir):
