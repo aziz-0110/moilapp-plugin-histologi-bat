@@ -6,6 +6,7 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import shutil
+import time
 
 class Controller(QWidget):
     def __init__(self, model):
@@ -21,6 +22,9 @@ class Controller(QWidget):
         self.set_stylesheet()
 
     def set_stylesheet(self):
+        self.ui.label_9.setStyleSheet(self.model.style_label_title())
+        self.ui.label_3.setStyleSheet(self.model.style_label_title())
+
         self.ui.label.setStyleSheet(self.model.style_label())
         self.ui.label_2.setStyleSheet(self.model.style_label())
         self.ui.label_4.setStyleSheet(self.model.style_label())
@@ -29,6 +33,14 @@ class Controller(QWidget):
         self.ui.label_7.setStyleSheet(self.model.style_label())
         self.ui.label_8.setStyleSheet(self.model.style_font_12())
         self.ui.lbl_cell.setStyleSheet(self.model.style_font_12())
+        self.ui.label_8.hide()
+        self.ui.lbl_cell.hide()
+
+        self.ui.frame_3.setStyleSheet(self.model.style_frame_main())
+        self.ui.frame_5.setStyleSheet(self.model.style_frame_object())
+
+        self.ui.frame_7.setStyleSheet(self.model.style_frame_main())
+        self.ui.frame_8.setStyleSheet(self.model.style_frame_object())
 
         self.ui.img_grafik.setStyleSheet(self.model.style_label())
         self.ui.img_ori.setStyleSheet(self.model.style_label())
@@ -50,6 +62,8 @@ class Controller(QWidget):
         # self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/img_tmp")
 
         self.checkDir(self.path_img_save)
+
+        # self.
 
     def save_img(self):
         if self.render_image == False: return
@@ -100,6 +114,8 @@ class Controller(QWidget):
         self.checkDir(f"{self.path_img_save}/img_processing")
         img = cv2.imread(img_path)
         size = 400
+
+        # self.ui.btn_save.hasMouseTracking()
 
         self.morp_opr(img)
 
@@ -249,6 +265,8 @@ class Controller(QWidget):
         # yPoit = np.array(self.y_point)
 
         plt.plot(self.x_point, self.y_point)
+        plt.xlabel("Total Cells")
+        plt.ylabel("Width Cells")
 
         plt.savefig(f"{self.path_img_save}/img_processing/graph.png")
 
