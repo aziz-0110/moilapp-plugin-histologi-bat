@@ -127,7 +127,7 @@ class Controller(QWidget):
         switch_obj = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
 
         self.labelling(switch_obj)
-        self.count_cell()
+        self.count_wide_cell()
 
         canny = cv2.imread(f"{self.path_img_save}/img_processing/canny.png")
         distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png")
@@ -161,15 +161,6 @@ class Controller(QWidget):
 
         # return img_mop
 
-    def switch_obj(self):
-        img_morp = cv2.imread(f"{self.path_img_save}/img_processing/morp.png", 0)
-        for i in range(0, img_morp.shape[0]):
-            for j in range(0, img_morp.shape[1]):
-                px = 255 if img_morp[i][j] == 0 else 0
-                img_morp[i][j] = px
-        cv2.imwrite(f"{self.path_img_save}/img_processing/switch-obj.png", img_morp)
-        # return  img_morp
-
     def labelling(self, switch_obj):
         # morph = cv2.imread(f"{self.path_img_save}morp.png")
         canny = cv2.Canny(switch_obj, 100, 200)
@@ -178,7 +169,7 @@ class Controller(QWidget):
         kontur1, _ = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(self.image_original, kontur1, -1, (0, 255, 0), 5)
 
-    def count_cell(self):
+    def count_wide_cell(self):
         img_switch = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
         gray = cv2.cvtColor(img_switch, cv2.COLOR_BGR2GRAY)
         threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
