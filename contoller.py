@@ -1,4 +1,5 @@
 from src.plugin_interface import PluginInterface
+from PyQt6 import QtGui
 from PyQt6.QtWidgets import QWidget
 from .ui_main import Ui_Form
 import os
@@ -108,7 +109,7 @@ class Controller(QWidget):
     def show_to_ui_img_1(self, img_path):
         self.checkDir(f"{self.path_img_save}/img_processing")
         img = cv2.imread(img_path)
-        size = 400
+        size = 388
 
         # self.ui.btn_save.hasMouseTracking()
         self.ui.frame_7.show()

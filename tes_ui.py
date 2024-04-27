@@ -270,6 +270,7 @@ class Ui_Form(object):
         self.verticalLayout_5.addWidget(self.label)
         self.img_label = QtWidgets.QLabel(self.frame_5)
         self.img_label.setText("")
+        self.img_label.setPixmap(QtGui.QPixmap("icon.png"))
         self.img_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.img_label.setObjectName("img_label")
         self.verticalLayout_5.addWidget(self.img_label)
@@ -302,8 +303,8 @@ class Ui_Form(object):
     def retranslateUi(self, Form):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
-        self.btn_load.setText(_translate("Form", "Image Processing"))
-        self.btn_crop.setText(_translate("Form", "Crop Image"))
+        self.btn_load.setText(_translate("Form", "Load Image"))
+        self.btn_crop.setText(_translate("Form", "Crop"))
         self.btn_save.setText(_translate("Form", "Save"))
         self.btn_clear.setText(_translate("Form", "Clear"))
         self.label_9.setText(_translate("Form", "Image Processing"))
@@ -314,29 +315,6 @@ class Ui_Form(object):
         self.label_3.setText(_translate("Form", "Result"))
         self.label.setText(_translate("Form", "Coloring Outline & Calculating Cell Width"))
         self.label_7.setText(_translate("Form", "Graph"))
-
-        # self.btn_clear.setToolTip(_translate("Form", """
-        # <!doctype html>
-        # <html lang="en">
-        #   <head>
-        #   <style>
-        #     h4 {
-        #     color: red;
-        #     text-align: center;
-        #     }
-        #     p {
-        #     color: #403f3f
-        #     }
-        #   </style>
-        #   </head>
-        #   <body>
-        #     <h4>No image to clean up</h4>
-        #     <p>Perform image processing or cropping first</p>
-        #   </body>
-        # </html>
-        # """))
-
-
 
 
 if __name__ == "__main__":
