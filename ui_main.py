@@ -254,7 +254,14 @@ class Ui_Form(object):
         self.frame_5.setObjectName("frame_5")
         self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.frame_5)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
-        self.label = QtWidgets.QLabel(self.frame_5)
+        self.frame_10 = QtWidgets.QFrame(self.frame_5)
+        self.frame_10.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.frame_10.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+        self.frame_10.setObjectName("frame_10")
+        self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.frame_10)
+        self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.verticalLayout_8.setObjectName("verticalLayout_8")
+        self.label = QtWidgets.QLabel(self.frame_10)
         self.label.setMinimumSize(QtCore.QSize(0, 25))
         self.label.setMaximumSize(QtCore.QSize(16777215, 25))
         font = QtGui.QFont()
@@ -267,12 +274,31 @@ class Ui_Form(object):
         self.label.setFrameShadow(QtWidgets.QFrame.Shadow.Sunken)
         self.label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.label.setObjectName("label")
-        self.verticalLayout_5.addWidget(self.label)
-        self.img_label = QtWidgets.QLabel(self.frame_5)
+        self.verticalLayout_8.addWidget(self.label)
+        self.img_label = QtWidgets.QLabel(self.frame_10)
         self.img_label.setText("")
-        self.img_label.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
         self.img_label.setObjectName("img_label")
-        self.verticalLayout_5.addWidget(self.img_label)
+        self.verticalLayout_8.addWidget(self.img_label)
+        self.frame_crop = QtWidgets.QFrame(self.frame_10)
+        self.frame_crop.setInputMethodHints(QtCore.Qt.InputMethodHint.ImhNone)
+        self.frame_crop.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.frame_crop.setFrameShadow(QtWidgets.QFrame.Shadow.Raised)
+        self.frame_crop.setObjectName("frame_crop")
+        self.horizontalLayout_6 = QtWidgets.QHBoxLayout(self.frame_crop)
+        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_6.setSpacing(0)
+        self.horizontalLayout_6.setObjectName("horizontalLayout_6")
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_6.addItem(spacerItem1)
+        self.img_result = QtWidgets.QLabel(self.frame_crop)
+        self.img_result.setText("")
+        self.img_result.setAlignment(QtCore.Qt.AlignmentFlag.AlignCenter)
+        self.img_result.setObjectName("img_result")
+        self.horizontalLayout_6.addWidget(self.img_result)
+        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Minimum)
+        self.horizontalLayout_6.addItem(spacerItem2)
+        self.verticalLayout_8.addWidget(self.frame_crop)
+        self.verticalLayout_5.addWidget(self.frame_10)
         self.label_7 = QtWidgets.QLabel(self.frame_5)
         self.label_7.setMinimumSize(QtCore.QSize(0, 25))
         self.label_7.setMaximumSize(QtCore.QSize(16777215, 25))
@@ -303,7 +329,7 @@ class Ui_Form(object):
         _translate = QtCore.QCoreApplication.translate
         Form.setWindowTitle(_translate("Form", "Form"))
         self.btn_load.setText(_translate("Form", "Image Processing"))
-        self.btn_crop.setText(_translate("Form", "Crop Image"))
+        self.btn_crop.setText(_translate("Form", "Croping Image"))
         self.btn_save.setText(_translate("Form", "Save"))
         self.btn_clear.setText(_translate("Form", "Clear"))
         self.label_9.setText(_translate("Form", "Image Processing"))
@@ -314,29 +340,6 @@ class Ui_Form(object):
         self.label_3.setText(_translate("Form", "Result"))
         self.label.setText(_translate("Form", "Coloring Outline & Calculating Cell Width"))
         self.label_7.setText(_translate("Form", "Graph"))
-
-        # self.btn_clear.setToolTip(_translate("Form", """
-        # <!doctype html>
-        # <html lang="en">
-        #   <head>
-        #   <style>
-        #     h4 {
-        #     color: red;
-        #     text-align: center;
-        #     }
-        #     p {
-        #     color: #403f3f
-        #     }
-        #   </style>
-        #   </head>
-        #   <body>
-        #     <h4>No image to clean up</h4>
-        #     <p>Perform image processing or cropping first</p>
-        #   </body>
-        # </html>
-        # """))
-
-
 
 
 if __name__ == "__main__":

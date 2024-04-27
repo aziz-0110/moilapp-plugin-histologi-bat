@@ -1,5 +1,4 @@
 from src.plugin_interface import PluginInterface
-from PyQt6 import QtGui
 from PyQt6.QtWidgets import QWidget
 from .ui_main import Ui_Form
 import os
@@ -7,7 +6,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import shutil
-import time
 
 class Controller(QWidget):
     def __init__(self, model):
@@ -45,6 +43,7 @@ class Controller(QWidget):
         self.ui.img_morph.setStyleSheet(self.model.style_label())
         self.ui.img_canny.setStyleSheet(self.model.style_label())
         self.ui.img_label.setStyleSheet(self.model.style_label())
+        self.ui.img_result.setStyleSheet(self.model.style_label())
 
         self.ui.btn_load.setStyleSheet(self.model.style_pushbutton())
         self.ui.btn_clear.setStyleSheet(self.model.style_pushbutton())
@@ -55,6 +54,8 @@ class Controller(QWidget):
         self.ui.btn_crop.clicked.connect(self.load_image_crop)
         self.ui.btn_clear.clicked.connect(self.clearImg)
         self.ui.btn_save.clicked.connect(self.save_img)
+
+        self.ui.frame_crop.hide()
 
         # self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/img_tmp")
 
@@ -76,6 +77,7 @@ class Controller(QWidget):
         self.ui.img_label.clear()
         self.ui.img_grafik.clear()
         self.ui.img_canny.clear()
+        self.ui.img_result.clear()
         self.image_original = None
         self.image = self.image_original
         self.render_image = False
@@ -112,6 +114,9 @@ class Controller(QWidget):
         size = 388
 
         # self.ui.btn_save.hasMouseTracking()
+        self.ui.frame_crop.hide()
+
+        self.ui.img_label.show()
         self.ui.frame_7.show()
         self.ui.img_grafik.show()
         self.ui.label_7.show()
@@ -205,12 +210,15 @@ class Controller(QWidget):
 
         self.checkDir(dir_img_save_path)
 
+        self.ui.frame_crop.show()
+
+        self.ui.img_label.hide()
         self.ui.frame_7.hide()
         self.ui.img_grafik.hide()
         self.ui.label_7.hide()
         self.ui.label.hide()
 
-        self.model.show_image_to_label(self.ui.img_label, self.image_original, 620)
+        self.model.show_image_to_label(self.ui.img_result, self.image_original, 620)
         self.crop_img(dir_img_save_path, img_path)
 
     def checkDir(self, path_dir):
