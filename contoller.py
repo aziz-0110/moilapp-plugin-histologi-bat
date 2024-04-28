@@ -56,8 +56,6 @@ class Controller(QWidget):
         self.ui.btn_clear.clicked.connect(self.clearImg)
         self.ui.btn_save.clicked.connect(self.save_img)
 
-        # self.ui.comboBox.ac
-
         self.ui.frame_crop.hide()
 
         # self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/img_tmp")
@@ -73,7 +71,7 @@ class Controller(QWidget):
             os.system("rm -R ./plugins/moilapp-plugin-histologi-bat/img_save")
         shutil.copytree(f"{self.path_img_save}", "./plugins/moilapp-plugin-histologi-bat/img_save/")
 
-        QMessageBox.information(self, "Alert", "Images are stored in the img_save directory.")
+        QMessageBox.information(self, "Alert", "Images are stored in \"img_save\" directory.")
 
     def clearImg(self):
         self.ui.img_ori.clear()
@@ -244,6 +242,7 @@ class Controller(QWidget):
 
         self.model.show_image_to_label(self.ui.img_result, self.image_original, size)
         self.crop_img(dir_img_save_path, img_path)
+        QMessageBox.information(self, "Alert", "Images are stored in \"img_tmp/crop\" directory.")
 
     def checkDir(self, path_dir):
         if (os.path.exists(f"{path_dir}")):
