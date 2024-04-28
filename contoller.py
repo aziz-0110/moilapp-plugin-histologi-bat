@@ -139,18 +139,17 @@ class Controller(QWidget):
         switch_obj = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
 
         self.labelling(switch_obj)
-        self.count_wide_cell(0)
-        self.count_wide_cell(1)
+        self.count_wide_cell()
 
         canny = cv2.imread(f"{self.path_img_save}/img_processing/canny.png")
         distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png")
         # count_cell = cv2.imread(f"{self.path_img_save}/img_processing/count_cell.png")
 
         self.model.show_image_to_label(self.ui.img_ori, img, size)
-        self.model.show_image_to_label(self.ui.img_morph, self.image_original2, size)
         self.model.show_image_to_label(self.ui.img_canny, canny, size)
         self.model.show_image_to_label(self.ui.img_dist, distace, size)
         self.model.show_image_to_label(self.ui.img_label, self.image_original, size)
+        self.model.show_image_to_label(self.ui.img_morph, self.image_original2, size)
 
         self.graph()
         graph = cv2.imread(f"{self.path_img_save}/img_processing/graph.png")
@@ -184,7 +183,7 @@ class Controller(QWidget):
         cv2.drawContours(self.image_original, kontur1, -1, (0, 255, 0), 5)
         cv2.drawContours(self.image_original2, kontur1, -1, (0, 255, 0), 5)
 
-    def count_wide_cell(self, condition):
+    def count_wide_cell(self):
         img_switch = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
         gray = cv2.cvtColor(img_switch, cv2.COLOR_BGR2GRAY)
         threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
@@ -204,25 +203,15 @@ class Controller(QWidget):
 
         self.ui.totalCell.setText(f" Total Cell : {len(kontur2)} ")
 
-        if condition == 1 :
-            for i in range(0, len(kontur2)):
-                ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
-                wide = cv2.contourArea(kontur2[i], False)
-                if wide == 0: continue
-                cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45,
-                            (0, 0, 255), 1)
-                # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
-                self.x_point.append(int(i + 1))
-                self.y_point.append(int(wide))
-        if condition == 0 :
-            print(1)
-            for i in range(0, len(kontur2)):
-                ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
-                wide = cv2.contourArea(kontur2[i], False)
-                if wide == 0: continue
-                cv2.putText(self.image_original2, f"{int(i + 1)}", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45,
-                            (0, 0, 255), 1)
-
+        for i in range(0, len(kontur2)):
+            ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
+            wide = cv2.contourArea(kontur2[i], False)
+            if wide == 0: continue
+            cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            cv2.putText(self.image_original2, f"{int(i + 1)}", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            self.x_point.append(int(i + 1))
+            self.y_point.append(int(wide))
 
     def show_to_ui_img_crop(self, img_path):
         dir_img_save_path = f"{self.path_img_save}/crop"
