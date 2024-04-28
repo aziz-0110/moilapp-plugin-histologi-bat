@@ -1,5 +1,5 @@
 from src.plugin_interface import PluginInterface
-from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QWidget, QMessageBox
 from .ui_main import Ui_Form
 import os
 import cv2
@@ -30,6 +30,7 @@ class Controller(QWidget):
         self.ui.label_5.setStyleSheet(self.model.style_label())
         self.ui.label_6.setStyleSheet(self.model.style_label())
         self.ui.label_7.setStyleSheet(self.model.style_label())
+        self.ui.totalCell.setStyleSheet(self.model.style_label())
 
         self.ui.frame_3.setStyleSheet(self.model.style_frame_main())
         self.ui.frame_5.setStyleSheet(self.model.style_frame_object())
@@ -55,20 +56,24 @@ class Controller(QWidget):
         self.ui.btn_clear.clicked.connect(self.clearImg)
         self.ui.btn_save.clicked.connect(self.save_img)
 
+        # self.ui.comboBox.ac
+
         self.ui.frame_crop.hide()
 
         # self.checkDir(f"./plugins/moilapp-plugin-histologi-bat/img_tmp")
 
         self.checkDir(self.path_img_save)
 
-        # self.
-
     def save_img(self):
-        if self.render_image == False: return
+        if self.render_image == False:
+            QMessageBox.information(self, "Alert", "There is no image to save, do something first!!!")
+            return
 
         if os.path.exists("./plugins/moilapp-plugin-histologi-bat/img_save"):
             os.system("rm -R ./plugins/moilapp-plugin-histologi-bat/img_save")
         shutil.copytree(f"{self.path_img_save}", "./plugins/moilapp-plugin-histologi-bat/img_save/")
+
+        QMessageBox.information(self, "Alert", "Images are stored in the img_save directory.")
 
     def clearImg(self):
         self.ui.img_ori.clear()
@@ -78,26 +83,33 @@ class Controller(QWidget):
         self.ui.img_grafik.clear()
         self.ui.img_canny.clear()
         self.ui.img_result.clear()
+        self.ui.totalCell.setText(" Total Cell : ")
         self.image_original = None
+        self.image_original2 = None
         self.image = self.image_original
         self.render_image = False
         self.x_point = []
         self.y_point = []
 
     def load_image_1(self):
-        if self.render_image: return    # kalo true bakal kembali
+        if self.render_image:
+            QMessageBox.information(self, "Alert", "Please clear images")
+            return    # kalo true bakal kembali
         file = self.model.select_file()
         if file:
             if file:
                 self.moildev = self.model.connect_to_moildev(parameter_name=file)
             if file.partition('.')[-1].upper() in ['APNG', 'AVIF', 'GIF', 'JPEG', 'JPG', 'PNG', 'SVG', 'TIFF', 'WEBP']:
                 self.image_original = cv2.imread(file)
+                self.image_original2 = self.image_original.copy()
                 self.image = self.image_original.copy()
                 self.render_image = True
                 self.show_to_ui_img_1(file)
 
     def load_image_crop(self):
-        if self.render_image: return
+        if self.render_image:
+            QMessageBox.information(self, "Alert", "Please clear images")
+            return
         self.checkDir(f"{self.path_img_save}/crop")
         file = self.model.select_file()
         if file:
@@ -111,11 +123,13 @@ class Controller(QWidget):
     def show_to_ui_img_1(self, img_path):
         self.checkDir(f"{self.path_img_save}/img_processing")
         img = cv2.imread(img_path)
-        size = 388
+        resolution = [588, 700, 900]
+        size = resolution[self.ui.comboBox.currentIndex()]
 
-        # self.ui.btn_save.hasMouseTracking()
         self.ui.frame_crop.hide()
 
+        self.ui.img_morph.show()
+        self.ui.label_6.show()
         self.ui.img_label.show()
         self.ui.frame_7.show()
         self.ui.img_grafik.show()
@@ -127,13 +141,15 @@ class Controller(QWidget):
         switch_obj = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
 
         self.labelling(switch_obj)
-        self.count_wide_cell()
+        self.count_wide_cell(0)
+        self.count_wide_cell(1)
 
         canny = cv2.imread(f"{self.path_img_save}/img_processing/canny.png")
         distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png")
+        # count_cell = cv2.imread(f"{self.path_img_save}/img_processing/count_cell.png")
 
         self.model.show_image_to_label(self.ui.img_ori, img, size)
-        self.model.show_image_to_label(self.ui.img_morph, switch_obj, size)
+        self.model.show_image_to_label(self.ui.img_morph, self.image_original2, size)
         self.model.show_image_to_label(self.ui.img_canny, canny, size)
         self.model.show_image_to_label(self.ui.img_dist, distace, size)
         self.model.show_image_to_label(self.ui.img_label, self.image_original, size)
@@ -168,8 +184,9 @@ class Controller(QWidget):
 
         kontur1, _ = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         cv2.drawContours(self.image_original, kontur1, -1, (0, 255, 0), 5)
+        cv2.drawContours(self.image_original2, kontur1, -1, (0, 255, 0), 5)
 
-    def count_wide_cell(self):
+    def count_wide_cell(self, condition):
         img_switch = cv2.imread(f"{self.path_img_save}/img_processing/switch-obj.png")
         gray = cv2.cvtColor(img_switch, cv2.COLOR_BGR2GRAY)
         threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
@@ -187,29 +204,45 @@ class Controller(QWidget):
         kontur2, _ = cv2.findContours(img_distace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # mc = 264.5833  # 1 px = 264.5833 micrometer
 
-        for i in range(0, len(kontur2)):
-            ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
-            wide = cv2.contourArea(kontur2[i], False)
-            if wide == 0: continue
-            cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
-            # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
-            self.x_point.append(int(i + 1))
-            self.y_point.append(int(wide))
+        self.ui.totalCell.setText(f" Total Cell : {len(kontur2)} ")
+
+        if condition == 1 :
+            for i in range(0, len(kontur2)):
+                ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
+                wide = cv2.contourArea(kontur2[i], False)
+                if wide == 0: continue
+                cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45,
+                            (0, 0, 255), 1)
+                # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+                self.x_point.append(int(i + 1))
+                self.y_point.append(int(wide))
+        if condition == 0 :
+            print(1)
+            for i in range(0, len(kontur2)):
+                ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
+                wide = cv2.contourArea(kontur2[i], False)
+                if wide == 0: continue
+                cv2.putText(self.image_original2, f"{int(i + 1)}", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45,
+                            (0, 0, 255), 1)
+
 
     def show_to_ui_img_crop(self, img_path):
         dir_img_save_path = f"{self.path_img_save}/crop"
-
+        resolution = [660, 800, 1000]
+        size = resolution[self.ui.comboBox.currentIndex()]
         self.checkDir(dir_img_save_path)
 
         self.ui.frame_crop.show()
 
+        self.ui.label_6.hide()
+        self.ui.img_morph.hide()
         self.ui.img_label.hide()
         self.ui.frame_7.hide()
         self.ui.img_grafik.hide()
         self.ui.label_7.hide()
         self.ui.label.hide()
 
-        self.model.show_image_to_label(self.ui.img_result, self.image_original, 620)
+        self.model.show_image_to_label(self.ui.img_result, self.image_original, size)
         self.crop_img(dir_img_save_path, img_path)
 
     def checkDir(self, path_dir):
