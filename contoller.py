@@ -143,13 +143,15 @@ class Controller(QWidget):
 
         canny = cv2.imread(f"{self.path_img_save}/img_processing/canny.png")
         distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png")
-        # count_cell = cv2.imread(f"{self.path_img_save}/img_processing/count_cell.png")
 
         self.model.show_image_to_label(self.ui.img_ori, img, size)
         self.model.show_image_to_label(self.ui.img_canny, canny, size)
         self.model.show_image_to_label(self.ui.img_dist, distace, size)
         self.model.show_image_to_label(self.ui.img_label, self.image_original, size)
         self.model.show_image_to_label(self.ui.img_count, self.image_original2, size)
+
+        cv2.imwrite(f"{self.path_img_save}/img_processing/count_cell.png", self.image_original)
+        cv2.imwrite(f"{self.path_img_save}/img_processing/diameter_cell.png", self.image_original2)
 
         self.graph()
         graph = cv2.imread(f"{self.path_img_save}/img_processing/graph.png")
@@ -164,7 +166,7 @@ class Controller(QWidget):
         img_mop = cv2.morphologyEx(img_mop, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 1)))
         cv2.imwrite(f"{self.path_img_save}/img_processing/morp.png", img_mop)
 
-        # switch objek
+        # switch objek detection
         img_morp = img_mop.copy()
         for i in range(0, img_morp.shape[0]):
             for j in range(0, img_morp.shape[1]):
@@ -175,11 +177,13 @@ class Controller(QWidget):
         # return img_mop
 
     def labelling(self, switch_obj):
-        # morph = cv2.imread(f"{self.path_img_save}morp.png")
+        # canny digunakan untuk deteksi garis luar sel
         canny = cv2.Canny(switch_obj, 100, 200)
         cv2.imwrite(f"{self.path_img_save}/img_processing/canny.png", canny)
 
+        # deteksi sel
         kontur1, _ = cv2.findContours(canny, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+        # gambar garis luar sel ke dalam gambar original
         cv2.drawContours(self.image_original, kontur1, -1, (0, 255, 0), 5)
         cv2.drawContours(self.image_original2, kontur1, -1, (0, 255, 0), 5)
 
@@ -188,11 +192,13 @@ class Controller(QWidget):
         gray = cv2.cvtColor(img_switch, cv2.COLOR_BGR2GRAY)
         threshold = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
+        # membuat matriks 3 x 3 dengan tipe uint8
         kernel = np.ones((3, 3), np.uint8)
+
         mop_open = cv2.morphologyEx(threshold, cv2.MORPH_OPEN, kernel, iterations=2)
 
         # dilate = cv2.dilate(mop_open, kernel, iterations=2)
-
+        # deteksi diameter sel dgn cara memperkecil sel tsb
         distance_trans = cv2.distanceTransform(mop_open, cv2.DIST_L2, cv2.DIST_MASK_5)
         dist_thres = cv2.threshold(distance_trans, 0.24 * distance_trans.max(), 255, cv2.THRESH_BINARY)[1]
         cv2.imwrite(f"{self.path_img_save}/img_processing/distance.png", dist_thres)
@@ -201,8 +207,10 @@ class Controller(QWidget):
         kontur2, _ = cv2.findContours(img_distace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # mc = 264.5833  # 1 px = 264.5833 micrometer
 
+        # total sel
         self.ui.totalCell.setText(f" Total Cell : {len(kontur2)} ")
 
+        # loop untuk menghitung diameter & nomor sel
         for i in range(0, len(kontur2)):
             ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
             wide = cv2.contourArea(kontur2[i], False)
