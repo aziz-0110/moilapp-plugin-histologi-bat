@@ -512,7 +512,7 @@ QPushButton#btn_crop:hover {
                      <enum>QFrame::Sunken</enum>
                     </property>
                     <property name="text">
-                     <string>Separating Cells</string>
+                     <string>Diameter Detection</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>
@@ -623,7 +623,7 @@ QPushButton#btn_crop:hover {
                   <enum>QFrame::Sunken</enum>
                  </property>
                  <property name="text">
-                  <string>Calculating Cell</string>
+                  <string>Count Cell</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
@@ -631,7 +631,7 @@ QPushButton#btn_crop:hover {
                 </widget>
                </item>
                <item>
-                <widget class="QLabel" name="img_morp">
+                <widget class="QLabel" name="img_count">
                  <property name="text">
                   <string/>
                  </property>
@@ -689,7 +689,7 @@ QPushButton#btn_crop:hover {
                      <enum>QFrame::Sunken</enum>
                     </property>
                     <property name="text">
-                     <string>Calculating Cell Diameter</string>
+                     <string>Count Cell Diameter</string>
                     </property>
                     <property name="alignment">
                      <set>Qt::AlignCenter</set>

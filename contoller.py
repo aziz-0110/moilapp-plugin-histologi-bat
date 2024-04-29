@@ -41,7 +41,7 @@ class Controller(QWidget):
         self.ui.img_grafik.setStyleSheet(self.model.style_label())
         self.ui.img_ori.setStyleSheet(self.model.style_label())
         self.ui.img_dist.setStyleSheet(self.model.style_label())
-        self.ui.img_morph.setStyleSheet(self.model.style_label())
+        self.ui.img_count.setStyleSheet(self.model.style_label())
         self.ui.img_canny.setStyleSheet(self.model.style_label())
         self.ui.img_label.setStyleSheet(self.model.style_label())
         self.ui.img_result.setStyleSheet(self.model.style_label())
@@ -75,7 +75,7 @@ class Controller(QWidget):
 
     def clearImg(self):
         self.ui.img_ori.clear()
-        self.ui.img_morph.clear()
+        self.ui.img_count.clear()
         self.ui.img_dist.clear()
         self.ui.img_label.clear()
         self.ui.img_grafik.clear()
@@ -126,7 +126,7 @@ class Controller(QWidget):
 
         self.ui.frame_crop.hide()
 
-        self.ui.img_morph.show()
+        self.ui.img_count.show()
         self.ui.label_6.show()
         self.ui.img_label.show()
         self.ui.frame_7.show()
@@ -149,7 +149,7 @@ class Controller(QWidget):
         self.model.show_image_to_label(self.ui.img_canny, canny, size)
         self.model.show_image_to_label(self.ui.img_dist, distace, size)
         self.model.show_image_to_label(self.ui.img_label, self.image_original, size)
-        self.model.show_image_to_label(self.ui.img_morph, self.image_original2, size)
+        self.model.show_image_to_label(self.ui.img_count, self.image_original2, size)
 
         self.graph()
         graph = cv2.imread(f"{self.path_img_save}/img_processing/graph.png")
@@ -222,7 +222,7 @@ class Controller(QWidget):
         self.ui.frame_crop.show()
 
         self.ui.label_6.hide()
-        self.ui.img_morph.hide()
+        self.ui.img_count.hide()
         self.ui.img_label.hide()
         self.ui.frame_7.hide()
         self.ui.img_grafik.hide()
