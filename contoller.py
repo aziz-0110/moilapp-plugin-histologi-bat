@@ -206,6 +206,7 @@ class Controller(QWidget):
         img_distace = cv2.imread(f"{self.path_img_save}/img_processing/distance.png", 0)
         kontur2, _ = cv2.findContours(img_distace, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         # mc = 264.5833  # 1 px = 264.5833 micrometer
+        mm = 0.2645833333  # 1 px = 0.2645833333 milimeter
 
         # total sel
         self.ui.totalCell.setText(f" Total Cell : {len(kontur2)} ")
@@ -213,13 +214,13 @@ class Controller(QWidget):
         # loop untuk menghitung diameter & nomor sel
         for i in range(0, len(kontur2)):
             ((x, y), r) = cv2.minEnclosingCircle(kontur2[i])
-            wide = cv2.contourArea(kontur2[i], False)
-            if wide == 0: continue
-            cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
-            cv2.putText(self.image_original2, f"{int(i + 1)}", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
-            # cv2.putText(img, f"{int(wide * mc)}μm", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            diameter = cv2.contourArea(kontur2[i], False)
+            if diameter == 0: continue
+            # cv2.putText(self.image_original, f"{int(wide)}px", (int(x) - 4, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            cv2.putText(self.image_original2, f"{int(i + 1)}", (int(x) - 15, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
+            cv2.putText(self.image_original, "{:.2f}mm".format(diameter * mm), (int(x) - 15, int(y)), cv2.FONT_HERSHEY_COMPLEX, 0.45, (0, 0, 255), 1)
             self.x_point.append(int(i + 1))
-            self.y_point.append(int(wide))
+            self.y_point.append(int(diameter * mm))
 
     def show_to_ui_img_crop(self, img_path):
         dir_img_save_path = f"{self.path_img_save}/crop"
